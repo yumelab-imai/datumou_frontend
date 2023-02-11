@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    // TSのソースコードを "src/*" で管理
+    "baseUrl": "src/", // 追記
+    "rootDir": "src/", // 追記
+  },
+  // コンパイルする対象
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  // コンパイル除外対象
+  "exclude": ["node_modules"]
+}
