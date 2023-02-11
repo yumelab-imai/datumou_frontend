@@ -1,67 +1,16 @@
 import Head from 'next/head'
-import Image from 'next/image'
-import Link from 'next/link'
-import { Inter } from '@next/font/google'
-import styles from '../styles/Home.module.css'
-
 import axios from "../libs/axios";
 import React, { useEffect, useMemo } from 'react';
-
-// import { useHandleLogout } from '../components/shared/function/Auth/AuthLisnter'
-import { mapDatum } from '../components/atomic/Atoms/mapData'
+import { mapDatum } from '../components/mapData'
 
 import { GoogleMap as GoogleMapComponent, LoadScript } from '@react-google-maps/api';
 import { FC } from "react";
 import { useJsApiLoader as UseJsApiLoader, MarkerF, InfoWindowF } from "@react-google-maps/api";
 import { useState } from "react";
-import { isNullishCoalesce } from 'typescript'
+import { Map, TypeBounds, markerLabel, TypeSpotList } from "../type/client/Map";
 
 let mapDatumTest = mapDatum[0]
 let spotList = mapDatumTest.spots
-
-/*////////////////////////////
-    Type area(移行予定)
-/*////////////////////////////
-type TypeSpotList = {
-    id: string;
-    name: string;
-    position: {
-        lat: number;
-        lng: number;
-    };
-    shopStars: number;
-    watchCount: number;
-    externalLinkUrl: string;
-    foo: string;
-}[]
-
-type Map = google.maps.Map;
-
-type TypeBounds = {
-    north : number;
-    east  : number;
-    south : number;
-    west  : number;
-};
-
-const markerLabel: google.maps.MarkerLabel = {
-    text: "エミナル",
-    fontFamily: "sans-serif",
-    fontSize: "15px",
-    fontWeight: "bold",
-};
-
-// 型定義サンプル
-// type FooProps = ({
-//     id: number
-//     name?: string
-//     infoList: Array<string>
-// });
-
-/*////////////////////////////
-    End Type area(移行予定)
-/*////////////////////////////
-
 
 /*////////////////////////////
     関数定義
@@ -230,12 +179,8 @@ const GoogleMap = () => {
 };
 
 
+// Web画面
 export default function Home() {
-    // const [map, setMap] = useState<Map | null>(null);
-
-    // const toggleMapTrackCurrentPosition =() => {
-    //     isMapTrackCurrentPosition ? disableMapTrackCurrentPostion() : enableMapTrackCurrentPosition();
-    // }
 
 
     return (
