@@ -12,7 +12,7 @@ import { mapDatum } from '../components/atomic/Atoms/mapData'
 
 import { GoogleMap as GoogleMapComponent, LoadScript } from '@react-google-maps/api';
 import { FC } from "react";
-import { useJsApiLoader, MarkerF, InfoWindowF } from "@react-google-maps/api";
+import { useJsApiLoader as UseJsApiLoader, MarkerF, InfoWindowF } from "@react-google-maps/api";
 import { useState } from "react";
 import { isNullishCoalesce } from 'typescript'
 
@@ -161,7 +161,7 @@ const GoogleMap = () => {
             //Error code
         }
         const zoom: number = 5;
-        const { isLoaded } = useJsApiLoader({
+        const { isLoaded } = UseJsApiLoader({
             id: "google-map",
             googleMapsApiKey: googleMapsApiKey,
         });
