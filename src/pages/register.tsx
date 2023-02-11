@@ -6,22 +6,22 @@ import styles from '../styles/Home.module.css'
 import axios from "../libs/axios";
 import React, { useEffect } from 'react';
 
-import RegisterPage from '../components/atomic/Pages/Auth/RegisterPage'
+// import RegisterPage from '../components/atomic/Pages/Auth/RegisterPage'
 
 
 
-const inter = Inter({ subsets: ['latin'] })
+// const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
-  useEffect(() => {
-    axios.get("/api/books").then((res) => {
-    const data = res.data;
-    console.log(data);
-   });
-  }, []);
+  // useEffect(() => {
+  //   axios.get("/api/books").then((res) => {
+  //   const data = res.data;
+  //   console.log(data);
+  //  });
+  // }, []);
   return (
     <>
-      <RegisterPage />
+      {/* <RegisterPage /> */}
     </>
   )
 }
