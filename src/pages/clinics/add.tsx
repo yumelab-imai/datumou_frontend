@@ -23,7 +23,7 @@ export default function Home() {
           <Modal isOpen={isOpen} onClose={onClose}>
               <ModalOverlay />
               <ModalContent>
-                  <ModalHeader>僕は登録フォームです</ModalHeader>
+                  <ModalHeader>クリニック登録フォーム</ModalHeader>
                   <ModalBody>
                       <Form />
                   </ModalBody>
