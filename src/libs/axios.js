@@ -1,15 +1,14 @@
-import Axios from "axios";
+import Axios from 'axios'
 
 // Axios.defaults.headers.post['Access-Control-Allow-Origin'] = '*';
 
 const axios = Axios.create({
-  baseURL: "http://localhost:8888",
+  baseURL: 'http://localhost:8888',
   headers: {
-    "X-Requested-With": "XMLHttpRequest",
-    "Access-Control-Allow-Origin": "*",
+    'X-Requested-With': 'XMLHttpRequest',
+    'Access-Control-Allow-Origin': '*',
   },
-  withCredentials: true,// クッキー認証の許可
-});
+  withCredentials: true, // クッキー認証の許可
+})
 
-
-export default axios;
+export default axios
