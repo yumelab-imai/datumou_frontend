@@ -12,15 +12,97 @@ import { Map, TypeBounds, markerLabel, TypeSpotList } from '../type/client/Map'
 let mapDatumTest = mapDatum[0]
 let spotList = mapDatumTest.spots
 
+// const getPrefectures = async () => {
+//   try {
+//     const response = await axios.get('/api/prefectures')
+//     await setPrefecturesArray(response.data)
+//   } catch (error) {
+//     console.error(error)
+//   }
+// }
+
+// const [spots, setSpots] = useState<object>({})
+
+
+// async function getSpot() {
+//   return await axios
+//     .post('/api/clinic/list')
+//     .then((response) => {
+//       console.log(response)
+// //       // console.log(response?.data)
+//       if (response?.data?.result == true) {
+//         // console.log(response)
+//         // console.log(response?.data?.message)
+//         spots = response?.data?.response_data
+//         alert('クリニックの情報を所得しました。')
+//       } else if (response?.data?.result == false) {
+//         // console.log(response)
+//         console.log(response?.data?.message)
+//         console.log(response?.data?.errors)
+//         alert('クリニックの情報を所得できませんでした。')
+//       } else {
+// //         // console.log(response)
+//         alert('通信エラーが発生いたしました。もう一度お確かめください')
+//       }
+//       console.log('spots 参照箇所1')
+//       console.log(spots)
+//       setSpots(spots)
+// //       return response?.data
+//     })
+//     .catch((error) => {
+//       console.error(error)
+//       alert('クリニックの所得において、エラーが発生いたしました。もう一度お確かめください')
+//     })
+// }
+// getSpot()
+// console.log('spots 参照箇所2')
+// console.log(spots)
+
 /*////////////////////////////
     関数定義
 /*/ ///////////////////////////
 
 // ページで表示する『GoogleMap コンポーネント』
 const GoogleMap = () => {
+  const [spots, setSpots] = useState<object>({})
+  const getSpot = async () => {
+    return await axios
+      .post('/api/clinic/list')
+      .then((response) => {
+        console.log(response)
+        //       // console.log(response?.data)
+        if (response?.data?.result == true) {
+          // console.log(response)
+          // console.log(response?.data?.message)
+          // spots = response?.data?.response_data
+          alert('クリニックの情報を所得しました。(2)')
+        } else if (response?.data?.result == false) {
+          // console.log(response)
+          console.log(response?.data?.message)
+          console.log(response?.data?.errors)
+          alert('クリニックの情報を所得できませんでした。')
+        } else {
+          //         // console.log(response)
+          alert('通信エラーが発生いたしました。もう一度お確かめください')
+        }
+        console.log('spots 参照箇所1')
+        console.log(response)
+        setSpots(response.data.response_data)
+        //       return response?.data
+      })
+      .catch((error) => {
+        console.error(error)
+        alert('クリニックの所得において、エラーが発生いたしました。もう一度お確かめください')
+      })
+  }
+
+  // getSpot()
+  console.log('spots 参照箇所3')
+  console.log(spots)
+  // console.log(spots[0])
   const [currentFocusSpot, setCurrentFocusSpot] = useState<google.maps.LatLngLiteral | null>(null)
-  const focusSpot = (spot: google.maps.LatLngLiteral) => {
-    setCurrentFocusSpot(spot)
+  const focusSpot = (spotLatLngLiteral: google.maps.LatLngLiteral) => {
+    setCurrentFocusSpot(spotLatLngLiteral)
   }
   const unFocusSpot = () => {
     setCurrentFocusSpot(null)
@@ -91,18 +173,29 @@ const GoogleMap = () => {
   const [map, setMap] = useState<Map | null>(null)
   const center: google.maps.LatLngLiteral = useMemo(() => ({ lat: 44, lng: -80 }), [])
 
-  const createBoundsBySpots = (spotList: TypeSpotList): TypeBounds => {
-    const result: TypeBounds = {
-      north: 0,
-      east: 0,
-      south: 0,
-      west: 0,
+  const createBoundsBySpots = (spots): TypeBounds => {
+    // const result: TypeBounds = {
+    const result = {
+      // north: 0,
+      // east: 0,
+      // south: 0,
+      // west: 0,
+      // 日本緯度経度
+      // north: 45,
+      // east: 153,
+      // south: 20,
+      // west: 122,
+      // 日本緯度経度(コンパクトバージョン)
+      north: 35,
+      east: 150,
+      south: 30,
+      west: 120,
     }
 
-    result.north = Math.max(...spotList.map((spot) => spot.position.lat))
-    result.east = Math.max(...spotList.map((spot) => spot.position.lng))
-    result.south = Math.min(...spotList.map((spot) => spot.position.lat))
-    result.west = Math.min(...spotList.map((spot) => spot.position.lng))
+    // result.north = Math.max(Object.keys(spots).map((spot) => spot.latitude))
+    // result.east = Math.max(Object.keys(spots).map((spot) => spot.longitude))
+    // result.south = Math.min(Object.keys(spots).map((spot) => spot.latitude))
+    // result.west = Math.min(Object.keys(spots).map((spot) => spot.longitude))
     return result
   }
 
@@ -120,7 +213,7 @@ const GoogleMap = () => {
     // GoogleMapComponentで使用
     const onLoad = (map: Map) => {
       // ここでどの範囲を初期状態で囲むかを１つのポジションで設定する
-      map.fitBounds(createBoundsBySpots(spotList), { top: 50, right: 1.0, bottom: 22.1, left: 1.0 })
+      map.fitBounds(createBoundsBySpots(spots), { top: 50, right: 1.0, bottom: 22.1, left: 1.0 })
       // googleMap を読み込んだ時の Map データをセットする
       setMap(map)
     }
@@ -141,10 +234,65 @@ const GoogleMap = () => {
     }
   }
 
+  const [spots2, setSpots2] = useState<Array>([])
+  const foo = ($object) => {
+    console.log('object')
+    console.log($object)
+    console.log('currentFocusSpot');
+    console.log(currentFocusSpot);
+    console.log(JSON.stringify($object) == JSON.stringify(currentFocusSpot))
+    return JSON.stringify($object) == JSON.stringify(currentFocusSpot)
+  }
+  const getSpot2 = async () => {
+    return await axios
+      .post('/api/clinic/list')
+      .then((response) => {
+        console.log(response)
+        //       // console.log(response?.data)
+        if (response?.data?.result == true) {
+          // console.log(response)
+          // console.log(response?.data?.message)
+          // spots = response?.data?.response_data
+          alert('クリニックの情報を所得しました。(1)')
+        } else if (response?.data?.result == false) {
+          // console.log(response)
+          console.log(response?.data?.message)
+          console.log(response?.data?.errors)
+          alert('クリニックの情報を所得できませんでした。')
+        } else {
+          //         // console.log(response)
+          alert('通信エラーが発生いたしました。もう一度お確かめください')
+        }
+        console.log('spots 参照箇所1')
+        console.log(response)
+        setSpots2(response.data.response_data)
+        //       return response?.data
+      })
+      .catch((error) => {
+        console.error(error)
+        alert('クリニックの所得において、エラーが発生いたしました。もう一度お確かめください')
+      })
+  }
+
+  useEffect(() => {
+    getSpot2()
+  }, [])
+
   useEffect(() => {
     SpotLightCurrentFocusSpot()
+    console.log(currentFocusSpot)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentFocusSpot])
+  useEffect(() => {
+    console.log('useEffect から spots2 を確認')
+    console.log(spots2)
+  }, [spots2])
+
+  // 北海道
+  const defaultPosition3 = {
+    lat: 43.7324393,
+    lng: 142.1273298,
+  }
 
   return (
     <>
@@ -157,17 +305,23 @@ const GoogleMap = () => {
           mapContainerStyle={containerStyle}
           onLoad={onLoad}
         >
-          <MarkerF position={defaultPosition} />
-          {spotList.map((e) => (
+          {/* <MarkerF position={defaultPosition} /> */}
+          {spots2.map((spot) => (
             <>
-              <MarkerF position={e.position} onClick={() => focusSpot(e.position)} />
+              {/* {console.log('Google Map 箇所からのコンソールログ')} */}
+              {/* {console.log({{e?.latitude, e?.longitude}})} */}
+              <MarkerF
+                position={{ lat: spot.latitude, lng: spot.longitude }}
+                onClick={() => focusSpot({ lat: spot.latitude, lng: spot.longitude })}
+              />
               {/* 今まで */}
               {/* <MarkerF position={e.position} label={markerLabel} onClick={() => focusSpot(e.position)}/> */}
               {/* <MarkerF position={e.position} label={markerLabel} onClick={(e) => displayConsole(e)}/> */}
               {/* HTMLでの吹き出しを設置 */}
-              {currentFocusSpot === e.position ? (
-                <InfoWindowF position={e.position} onCloseClick={() => unFocusSpot()}>
-                  <div>{e.name}</div>
+              {/* {currentFocusSpot == { lat: spot.latitude, lng: spot.longitude } ? ( */}
+              {foo({ lat: spot.latitude, lng: spot.longitude }) ? (
+                <InfoWindowF position={{ lat: spot.latitude, lng: spot.longitude }} onCloseClick={() => unFocusSpot()}>
+                  <div>{spot.clinic_name}</div>
                 </InfoWindowF>
               ) : null}
             </>

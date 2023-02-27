@@ -110,7 +110,8 @@ export const Form = () => {
         setIsDisabled(false)
         return response?.data
       })
-      .catch(error => {
+      .catch((error) => {
+        setIsDisabled(false)
         console.error(error)
         alert('エラーが発生いたしました。もう一度お確かめください')
       })
@@ -127,27 +128,27 @@ export const Form = () => {
       //   }, 3000)
       // })
       // try {
-        // const response = axios.post('/api/add/clinic', {
-        //   test: values,
-        // })
-        // const response = addClinic(formData);
-        addClinic(formData);
-        // console.log(response)
-        // responseData = response.response_data
-        // console.log('onSubmit side')
-        // if(response.result == true){
-        //   console.log(response)
-        //   console.log(response?.data?.message)
-        //   alert('クリニックを登録しました。')
-        // }else if (response?.result == false) {
-        //   console.log(response)
-        //   console.log(response?.data?.message)
-        //   alert('クリニックを登録できませんでした。')
-        // } else {
-        //   console.log(response)
-        //   alert('通信エラーが発生いたしました。もう一度お確かめください')
-        // }
-        // alert(JSON.stringify(response.data, null, 2))
+      // const response = axios.post('/api/add/clinic', {
+      //   test: values,
+      // })
+      // const response = addClinic(formData);
+      addClinic(formData)
+      // console.log(response)
+      // responseData = response.response_data
+      // console.log('onSubmit side')
+      // if(response.result == true){
+      //   console.log(response)
+      //   console.log(response?.data?.message)
+      //   alert('クリニックを登録しました。')
+      // }else if (response?.result == false) {
+      //   console.log(response)
+      //   console.log(response?.data?.message)
+      //   alert('クリニックを登録できませんでした。')
+      // } else {
+      //   console.log(response)
+      //   alert('通信エラーが発生いたしました。もう一度お確かめください')
+      // }
+      // alert(JSON.stringify(response.data, null, 2))
       // } catch (error) {
       //   // console.error(error)
       //   alert('サーバーと接続ができませんでした。もう一度お試しください。')
@@ -167,7 +168,6 @@ export const Form = () => {
 
   // }, [prefectures])
 
-
   const test: boolean | undefined = true
 
   return (
@@ -185,7 +185,9 @@ export const Form = () => {
           <FormLabel htmlFor="category_type">クリニックの種類</FormLabel>
           <Select id="category_type" {...register('category_type')}>
             <option>--</option>
-            <option value="1" selected>メンズエナル</option>
+            <option value="1">
+              メンズエナル
+            </option>
             <option value="2">あおばクリニック</option>
             <option value="3">Dr.COBA</option>
           </Select>
