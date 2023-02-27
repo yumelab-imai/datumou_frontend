@@ -9,8 +9,8 @@ import { useJsApiLoader as UseJsApiLoader, MarkerF, InfoWindowF } from '@react-g
 import { useState } from 'react'
 import { Map, TypeBounds, markerLabel, TypeSpotList } from '../type/client/Map'
 
-let mapDatumTest = mapDatum[0]
-let spotList = mapDatumTest.spots
+// let mapDatumTest = mapDatum[0]
+// let spotList = mapDatumTest.spots
 
 // const getPrefectures = async () => {
 //   try {
