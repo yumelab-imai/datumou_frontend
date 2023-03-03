@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import axios from '../libs/axios'
 import React, { useEffect, useMemo } from 'react'
-import { mapDatum } from '../components/mapData'
+// import { mapDatum } from '../components/mapData'
 
 import { GoogleMap as GoogleMapComponent, LoadScript } from '@react-google-maps/api'
 import { FC } from 'react'
@@ -9,97 +9,93 @@ import { useJsApiLoader as UseJsApiLoader, MarkerF, InfoWindowF } from '@react-g
 import { useState } from 'react'
 import { Map, TypeBounds, markerLabel, TypeSpotList } from '../type/client/Map'
 
-// let mapDatumTest = mapDatum[0]
-// let spotList = mapDatumTest.spots
 
-// const getPrefectures = async () => {
-//   try {
-//     const response = await axios.get('/api/prefectures')
-//     await setPrefecturesArray(response.data)
-//   } catch (error) {
-//     console.error(error)
-//   }
-// }
+import {
+  ChakraProvider,
+  Button,
+  Modal,
+  ModalBody,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalCloseButton,
+  useDisclosure, //utility hooks の一つ
+} from '@chakra-ui/react'
+import { SelectForm } from '../components/clinics/selectForm'
 
-// const [spots, setSpots] = useState<object>({})
+const GoogleMapPanel = ({ children, isScreenState, onOpen, setIsScreenState }) => {
+  // const [isActive, setIsActive] = useState(false)
+  const OverlayTwo = () => (
+    <ModalOverlay bgColor="white" backdropFilter="auto" backdropInvert="80%" backdropBlur="2px" />
+  )
+  const [overlay, setOverlay] = React.useState(<OverlayTwo />)
+  return (
+    <div style={{ display: isScreenState ? 'block' : 'none' }}>
+      <div className="page page-course">
+        <div className="area_wrapper">
+          <div className="area area-course_header">
+            <div className="course_header">
+              <h1 className="title">{'メンズエミナル'}</h1>
+            </div>
+          </div>
+
+          <div className="area area-sub_controllers">
+            <div className="sub_controllers">
+              <div
+                className="button current_position_button"
+              >
+                現在地
+              </div>
+              <div className="button watch_position_restart_button">GPS更新</div>
+            </div>
+          </div>
+
+          <div className="area area-current_stamp_info">
+            <div className="current_stamp_info">
+              <span className="text">検索ヒット数：{'51'}店舗</span>
+            </div>
+          </div>
+          {/* GoogleMapを配置する箇所 */}
+          {children}
+
+          <div className="area area-spot_list">
+            <div className="area area-stamp_button">
+              <div
+                className="stamp_button active"
+                onClick={() => {
+                  setOverlay(<OverlayTwo />)
+                  onOpen()
+                  setIsScreenState(false)
+                }}
+              >
+                <span className="text">指定のクリニック検索</span>
+              </div>
+              <div className="stamp_button">
+                <span className="text">半径〇〇キロ内検索</span>
+              </div>
+              <div className="stamp_button active">
+                <span className="text">サンプルテキスト</span>
+              </div>
+            </div>
+            <div className="area area-map">
+              <div className="map"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 
-// async function getSpot() {
-//   return await axios
-//     .post('/api/clinic/list')
-//     .then((response) => {
-//       console.log(response)
-// //       // console.log(response?.data)
-//       if (response?.data?.result == true) {
-//         // console.log(response)
-//         // console.log(response?.data?.message)
-//         spots = response?.data?.response_data
-//         alert('クリニックの情報を所得しました。')
-//       } else if (response?.data?.result == false) {
-//         // console.log(response)
-//         console.log(response?.data?.message)
-//         console.log(response?.data?.errors)
-//         alert('クリニックの情報を所得できませんでした。')
-//       } else {
-// //         // console.log(response)
-//         alert('通信エラーが発生いたしました。もう一度お確かめください')
-//       }
-//       console.log('spots 参照箇所1')
-//       console.log(spots)
-//       setSpots(spots)
-// //       return response?.data
-//     })
-//     .catch((error) => {
-//       console.error(error)
-//       alert('クリニックの所得において、エラーが発生いたしました。もう一度お確かめください')
-//     })
-// }
-// getSpot()
-// console.log('spots 参照箇所2')
-// console.log(spots)
 
 /*////////////////////////////
     関数定義
 /*/ ///////////////////////////
 
 // ページで表示する『GoogleMap コンポーネント』
-const GoogleMap = () => {
-  const [spots, setSpots] = useState<object>({})
-  const getSpot = async () => {
-    return await axios
-      .post('/api/clinic/list')
-      .then((response) => {
-        console.log(response)
-        //       // console.log(response?.data)
-        if (response?.data?.result == true) {
-          // console.log(response)
-          // console.log(response?.data?.message)
-          // spots = response?.data?.response_data
-          alert('クリニックの情報を所得しました。(2)')
-        } else if (response?.data?.result == false) {
-          // console.log(response)
-          console.log(response?.data?.message)
-          console.log(response?.data?.errors)
-          alert('クリニックの情報を所得できませんでした。')
-        } else {
-          //         // console.log(response)
-          alert('通信エラーが発生いたしました。もう一度お確かめください')
-        }
-        console.log('spots 参照箇所1')
-        console.log(response)
-        setSpots(response.data.response_data)
-        //       return response?.data
-      })
-      .catch((error) => {
-        console.error(error)
-        alert('クリニックの所得において、エラーが発生いたしました。もう一度お確かめください')
-      })
-  }
-
-  // getSpot()
-  console.log('spots 参照箇所3')
-  console.log(spots)
-  // console.log(spots[0])
+const GoogleMap = ({ spots }) => {
   const [currentFocusSpot, setCurrentFocusSpot] = useState<google.maps.LatLngLiteral | null>(null)
   const focusSpot = (spotLatLngLiteral: google.maps.LatLngLiteral) => {
     setCurrentFocusSpot(spotLatLngLiteral)
@@ -234,59 +230,26 @@ const GoogleMap = () => {
     }
   }
 
-  const [spots2, setSpots2] = useState<Array>([])
-  const foo = ($object) => {
+  const openInfoWindow = ($object) => {
     console.log('object')
     console.log($object)
-    console.log('currentFocusSpot');
-    console.log(currentFocusSpot);
+    console.log('currentFocusSpot')
+    console.log(currentFocusSpot)
     console.log(JSON.stringify($object) == JSON.stringify(currentFocusSpot))
     return JSON.stringify($object) == JSON.stringify(currentFocusSpot)
   }
-  const getSpot2 = async () => {
-    return await axios
-      .post('/api/clinic/list')
-      .then((response) => {
-        console.log(response)
-        //       // console.log(response?.data)
-        if (response?.data?.result == true) {
-          // console.log(response)
-          // console.log(response?.data?.message)
-          // spots = response?.data?.response_data
-          alert('クリニックの情報を所得しました。(1)')
-        } else if (response?.data?.result == false) {
-          // console.log(response)
-          console.log(response?.data?.message)
-          console.log(response?.data?.errors)
-          alert('クリニックの情報を所得できませんでした。')
-        } else {
-          //         // console.log(response)
-          alert('通信エラーが発生いたしました。もう一度お確かめください')
-        }
-        console.log('spots 参照箇所1')
-        console.log(response)
-        setSpots2(response.data.response_data)
-        //       return response?.data
-      })
-      .catch((error) => {
-        console.error(error)
-        alert('クリニックの所得において、エラーが発生いたしました。もう一度お確かめください')
-      })
-  }
-
-  useEffect(() => {
-    getSpot2()
-  }, [])
 
   useEffect(() => {
     SpotLightCurrentFocusSpot()
     console.log(currentFocusSpot)
+    // 不具合対策
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentFocusSpot])
+
   useEffect(() => {
-    console.log('useEffect から spots2 を確認')
-    console.log(spots2)
-  }, [spots2])
+    console.log('spots 参照箇所33')
+    console.log(spots)
+  }, [spots])
 
   // 北海道
   const defaultPosition3 = {
@@ -306,20 +269,14 @@ const GoogleMap = () => {
           onLoad={onLoad}
         >
           {/* <MarkerF position={defaultPosition} /> */}
-          {spots2.map((spot) => (
+          {spots.map((spot) => (
             <>
-              {/* {console.log('Google Map 箇所からのコンソールログ')} */}
-              {/* {console.log({{e?.latitude, e?.longitude}})} */}
               <MarkerF
                 position={{ lat: spot.latitude, lng: spot.longitude }}
                 onClick={() => focusSpot({ lat: spot.latitude, lng: spot.longitude })}
               />
-              {/* 今まで */}
-              {/* <MarkerF position={e.position} label={markerLabel} onClick={() => focusSpot(e.position)}/> */}
-              {/* <MarkerF position={e.position} label={markerLabel} onClick={(e) => displayConsole(e)}/> */}
               {/* HTMLでの吹き出しを設置 */}
-              {/* {currentFocusSpot == { lat: spot.latitude, lng: spot.longitude } ? ( */}
-              {foo({ lat: spot.latitude, lng: spot.longitude }) ? (
+              {openInfoWindow({ lat: spot.latitude, lng: spot.longitude }) ? (
                 <InfoWindowF position={{ lat: spot.latitude, lng: spot.longitude }} onCloseClick={() => unFocusSpot()}>
                   <div>{spot.clinic_name}</div>
                 </InfoWindowF>
@@ -336,64 +293,71 @@ const GoogleMap = () => {
 
 // Web画面
 export default function Home() {
+  const [spots, setSpots] = useState<object>([])
+const _setSpot =  (spotData)=>{
+  console.log('Execute _setSpot')
+  console.log(spotData)
+  setSpots(spotData)
+}
+
+  const getSpot = async () => {
+    return await axios
+      .post('/api/clinic/list')
+      .then((response) => {
+        console.log(response)
+        if (response?.data?.result == true) {
+          alert('クリニックの情報を所得しました。(2)')
+        } else if (response?.data?.result == false) {
+          // console.log(response)
+          console.log(response?.data?.message)
+          console.log(response?.data?.errors)
+          alert('クリニックの情報を所得できませんでした。')
+        } else {
+          //         // console.log(response)
+          alert('通信エラーが発生いたしました。もう一度お確かめください')
+        }
+        console.log('spots 参照箇所1')
+        console.log(response)
+        setSpots(response.data.response_data)
+      })
+      .catch((error) => {
+        console.error(error)
+        alert('クリニックの所得において、エラーが発生いたしました。もう一度お確かめください')
+      })
+  }
+  useEffect(() => {
+    getSpot()
+  }, [])
+  const { isOpen, onClose, onOpen } = useDisclosure()
+  const [isScreenState, setIsScreenState] = React.useState(true)
   return (
     <>
       <Head>
         <title>Create Next App</title>
       </Head>
-      <div className="page page-course">
-        <div className="area_wrapper">
-          <div className="area area-course_header">
-            <div className="course_header">
-              <h1 className="title">{'メンズエミナル'}</h1>
-            </div>
-          </div>
-          {/* <Map/> */}
-          {/* JSでの処理 */}
-          {/* <div className="area area-map"> */}
-          {/* <div className="map " style={{width: '400px', height:'100px'}}
-                        ></div> */}
-          {/* </div> */}
-          <GoogleMap />
 
-          <div className="area area-sub_controllers">
-            <div className="sub_controllers">
-              <div
-                className="button current_position_button"
-                // onClick={toggleMapTrackCurrentPosition}
-              >
-                現在地
-              </div>
-              <div className="button watch_position_restart_button">GPS更新</div>
-            </div>
-          </div>
-
-          <div className="area area-current_stamp_info">
-            <div className="current_stamp_info">
-              <span className="text">検索ヒット数：{'51'}店舗</span>
-            </div>
-          </div>
-
-          <div className="area area-spot_list">
-            <div className="area area-stamp_button">
-              <div className="stamp_button active">
-                <span className="text">指定のクリニック検索</span>
-              </div>
-              <div className="stamp_button">
-                <span className="text">半径〇〇キロ内検索</span>
-              </div>
-              <div className="stamp_button active">
-                <span className="text">サンプルテキスト</span>
-              </div>
-            </div>
-            {/* Google Map */}
-            <div className="area area-map">
-              <div className="map"></div>
-            </div>
-            {/* <Map/> */}
-          </div>
-        </div>
-      </div>
+      {/* //このプロバイダーがないとうまく機能しない場合がある(真ん中にモーダルが出ない等) */}
+      <ChakraProvider>
+        <Modal
+          isOpen={isOpen}
+          onClose={() => {
+            onClose()
+            setIsScreenState(true)
+          }}
+        >
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>クリニック検索</ModalHeader>
+            <ModalBody>
+              {/* <Form prefecturesTest={prefecturesTest} /> */}
+              <SelectForm _setSpot={_setSpot} />
+            </ModalBody>
+          </ModalContent>
+        </Modal>
+      </ChakraProvider>
+      <GoogleMapPanel isScreenState={isScreenState} onOpen={onOpen} setIsScreenState={setIsScreenState}>
+        <GoogleMap spots={spots} />
+      </GoogleMapPanel>
     </>
   )
 }
