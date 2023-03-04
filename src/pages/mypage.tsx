@@ -4,7 +4,6 @@ import React, { useEffect, useMemo } from 'react'
 // import { mapDatum } from '../components/mapData'
 
 import { GoogleMap as GoogleMapComponent, LoadScript } from '@react-google-maps/api'
-import { FC } from 'react'
 import { useJsApiLoader as UseJsApiLoader, MarkerF, InfoWindowF } from '@react-google-maps/api'
 import { useState } from 'react'
 import { Map, TypeBounds, markerLabel, TypeSpotList } from '../type/client/Map'
@@ -23,8 +22,9 @@ import {
   useDisclosure, //utility hooks の一つ
 } from '@chakra-ui/react'
 import { SelectForm } from '../components/clinics/selectForm'
+import { FilterSpotForm } from '../components/clinics/FilterSpotForm'
 
-const GoogleMapPanel = ({ children, isScreenState, onOpen, setIsScreenState }) => {
+const GoogleMapPanel = ({ children, isScreenState, onOpen, setIsScreenState, spots, setModalType }) => {
   // const [isActive, setIsActive] = useState(false)
   const OverlayTwo = () => (
     <ModalOverlay bgColor="white" backdropFilter="auto" backdropInvert="80%" backdropBlur="2px" />
@@ -32,54 +32,52 @@ const GoogleMapPanel = ({ children, isScreenState, onOpen, setIsScreenState }) =
   const [overlay, setOverlay] = React.useState(<OverlayTwo />)
   return (
     <div style={{ display: isScreenState ? 'block' : 'none' }}>
-      <div className="page page-course">
-        <div className="area_wrapper">
-          <div className="area area-course_header">
-            <div className="course_header">
+      <div className="page-course">
+        <div className="wrapper">
+          <div>
+            <div className="spot_header">
               <h1 className="title">{'メンズエミナル'}</h1>
             </div>
           </div>
 
-          <div className="area area-sub_controllers">
+          <div className="area-sub_controllers">
             <div className="sub_controllers">
-              <div
-                className="button current_position_button"
-              >
-                現在地
-              </div>
-              <div className="button watch_position_restart_button">GPS更新</div>
+              <div className="button current_position_button">現在地</div>
+              <div className="button watch_position_restart_button current_position_button_new">GPS更新</div>
             </div>
           </div>
 
-          <div className="area area-current_stamp_info">
-            <div className="current_stamp_info">
-              <span className="text">検索ヒット数：{'51'}店舗</span>
-            </div>
+          <div className="hit_icon">
+            <span>検索ヒット数：{spots.length}店舗</span>
           </div>
           {/* GoogleMapを配置する箇所 */}
           {children}
 
-          <div className="area area-spot_list">
-            <div className="area area-stamp_button">
-              <div
-                className="stamp_button active"
-                onClick={() => {
-                  setOverlay(<OverlayTwo />)
-                  onOpen()
-                  setIsScreenState(false)
-                }}
-              >
-                <span className="text">指定のクリニック検索</span>
-              </div>
-              <div className="stamp_button">
-                <span className="text">半径〇〇キロ内検索</span>
-              </div>
-              <div className="stamp_button active">
-                <span className="text">サンプルテキスト</span>
-              </div>
+          <div className="list_area">
+            <div
+              className="list_button active"
+              onClick={() => {
+                setOverlay(<OverlayTwo />)
+                onOpen()
+                setIsScreenState(false)
+                setModalType(1)
+              }}
+            >
+              <span className="text">指定のクリニック検索</span>
             </div>
-            <div className="area area-map">
-              <div className="map"></div>
+            <div
+              className="list_button"
+              onClick={() => {
+                setOverlay(<OverlayTwo />)
+                onOpen()
+                setIsScreenState(false)
+                setModalType(2)
+              }}
+            >
+              <span className="text">半径〇〇キロ内検索</span>
+            </div>
+            <div className="list_button active">
+              <span className="text">サンプルテキスト</span>
             </div>
           </div>
         </div>
@@ -103,6 +101,14 @@ const GoogleMap = ({ spots }) => {
   const unFocusSpot = () => {
     setCurrentFocusSpot(null)
   }
+
+  
+
+
+
+
+
+
 
   // km算出
   const calcGeoDistance = (position1: google.maps.LatLngLiteral, position2: google.maps.LatLngLiteral) => {
@@ -269,8 +275,8 @@ const GoogleMap = ({ spots }) => {
           onLoad={onLoad}
         >
           {/* <MarkerF position={defaultPosition} /> */}
-          {spots.map((spot) => (
-            <>
+          {spots.map((spot,index) => (
+            <div key={index}>
               <MarkerF
                 position={{ lat: spot.latitude, lng: spot.longitude }}
                 onClick={() => focusSpot({ lat: spot.latitude, lng: spot.longitude })}
@@ -281,7 +287,7 @@ const GoogleMap = ({ spots }) => {
                   <div>{spot.clinic_name}</div>
                 </InfoWindowF>
               ) : null}
-            </>
+            </div>
           ))}
         </GoogleMapComponent>
       ) : (
@@ -293,12 +299,94 @@ const GoogleMap = ({ spots }) => {
 
 // Web画面
 export default function Home() {
+  const [myLocation, setMyLocation] = useState<object>({})
+  const [myAddress, setMyAddress] = useState<string>('不明')
+  // const getCurrentPosition = () => {
+  //   console.log('now loading position...')
+  //   // navigator.geolocation.getCurrentPosition((position) => {
+  //   //   const { latitude, longitude } = position.coords
+  //   //   setPosition({ latitude, longitude })
+  //   // })
+  // }
+
+  async function getCurrentLocation(): Promise<{ latitude: number; longitude: number }> {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error('Geolocation is not supported by your browser'))
+      } else {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude } = position.coords
+            resolve({ latitude, longitude })
+          },
+          (error) => {
+            reject(error)
+          }
+        )
+      }
+    })
+  }
+
+  async function getAddressFromCoordinates(latitude: number, longitude: number): Promise<string> {
+    const url =
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=` +
+      process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    console.log(url)
+    const response = await fetch(url)
+    const data = await response.json()
+    console.log(data)
+    if (data.error_message) {
+      throw new Error(data.error_message)
+    }
+    console.log(data.results[0].formatted_address)
+    return data.results[0].formatted_address
+  }
+
+  async function getMyLocation(): Promise<{ latitude: number; longitude: number; address: string }> {
+    try {
+      const { latitude, longitude } = await getCurrentLocation()
+      console.log({ latitude, longitude })
+      const address = await getAddressFromCoordinates(latitude, longitude)
+      console.log('written by Mr.ChatGTP...')
+      console.log(address)
+      console.log('ここで確認！')
+      // console.log(latitude1)
+      // console.log(longitude1)
+      // console.log(address1)
+      const myPosition = { lat: latitude, lng: longitude }
+      console.log(myPosition)
+      setMyLocation(myPosition)
+      setMyAddress(address)
+      console.log('written by Mr.ChatGTP...')
+      return { latitude, longitude, address }
+    } catch (error) {
+      throw new Error(error)
+      throw new Error('Unable to retrieve your location')
+    }
+  }
+
+  console.log('演算結果')
+  async function getMyLocationExample() {
+    try {
+      getMyLocation()
+    } catch (error) {
+      console.error(error)
+      console.error('Woops! bad problem is occured')
+    }
+  }
+  // getMyLocationExample()
   const [spots, setSpots] = useState<object>([])
-const _setSpot =  (spotData)=>{
-  console.log('Execute _setSpot')
-  console.log(spotData)
-  setSpots(spotData)
-}
+  const [modalType, setModalType] = useState<number>(1)
+  const _setSpot = (spotData) => {
+    console.log('Execute _setSpot')
+    console.log(spotData)
+    setSpots(spotData)
+  }
+  const _setModalType = (num) => {
+    // console.log('Execute _setSpot')
+    // console.log(num)
+    // setSpots(num)
+  }
 
   const getSpot = async () => {
     return await axios
@@ -327,7 +415,13 @@ const _setSpot =  (spotData)=>{
   }
   useEffect(() => {
     getSpot()
+    getMyLocationExample()
   }, [])
+  useEffect(() => {
+    console.log('現在のロケーションを変更しました。')
+    console.log(myLocation)
+    console.log(myAddress)
+  }, [myLocation, myAddress])
   const { isOpen, onClose, onOpen } = useDisclosure()
   const [isScreenState, setIsScreenState] = React.useState(true)
   return (
@@ -345,17 +439,38 @@ const _setSpot =  (spotData)=>{
             setIsScreenState(true)
           }}
         >
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>クリニック検索</ModalHeader>
-            <ModalBody>
-              {/* <Form prefecturesTest={prefecturesTest} /> */}
-              <SelectForm _setSpot={_setSpot} />
-            </ModalBody>
-          </ModalContent>
+          {modalType == 1 && (
+            <div>
+              <ModalOverlay />
+              <ModalContent>
+                <ModalHeader>クリニック検索</ModalHeader>
+                <ModalBody>
+                  {/* <Form prefecturesTest={prefecturesTest} /> */}
+                  <SelectForm _setSpot={_setSpot} />
+                </ModalBody>
+              </ModalContent>
+            </div>
+          )}
+          {modalType == 2 && (
+            <div>
+              <ModalOverlay />
+              <ModalContent>
+                <ModalHeader>半径〇〇キロ検索</ModalHeader>
+                <ModalBody>
+                  <FilterSpotForm _setSpot={_setSpot} spots={spots} myLocation={myLocation} />
+                </ModalBody>
+              </ModalContent>
+            </div>
+          )}
         </Modal>
       </ChakraProvider>
-      <GoogleMapPanel isScreenState={isScreenState} onOpen={onOpen} setIsScreenState={setIsScreenState}>
+      <GoogleMapPanel
+        isScreenState={isScreenState}
+        onOpen={onOpen}
+        setIsScreenState={setIsScreenState}
+        spots={spots}
+        setModalType={setModalType}
+      >
         <GoogleMap spots={spots} />
       </GoogleMapPanel>
     </>

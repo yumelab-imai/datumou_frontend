@@ -1,6 +1,4 @@
-import './globals.css'
 import './main.css'
-import './reset.css'
 import type { AppProps } from 'next/app'
 
 import React from 'react'

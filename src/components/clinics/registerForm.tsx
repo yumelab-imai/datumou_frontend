@@ -7,63 +7,6 @@ import { useForm } from 'react-hook-form'
 import axios from '../../libs/axios'
 
 import { GetStaticProps } from 'next'
-// axios.get('/api/prefectures')
-//       .then((response) => {
-//         let prefectures = response.data
-//         // let prefectures = JSON.parse(JSON.stringify(response.data))
-//         console.log(prefectures)
-//         // const data = res.data
-//       })
-//       .catch((error) => {
-//         // const data2 = error
-//         // console.log(data2)
-//         // return JSON.parse(JSON.stringify(data2))
-//       })
-
-// const apiSubmit = async () => {
-// return await axios
-//   .get('/api/prefectures')
-//   .then((response) => {
-//     const data = response.data
-//     // return JSON.parse(JSON.stringify(data))
-//     return data
-//   })
-//   .catch((error) => {
-//     // const data = error
-//     // return JSON.parse(JSON.stringify(data))
-//   })
-// }
-
-//   const getPrefectures = async () => {
-//     try {
-//       const response = await axios.get('/api/prefectures')
-//       // setPrefecturesArray(response.data)
-//       return response.data
-//     } catch (error) {
-//       console.error(error)
-//     }
-//   }
-//   // const prefectures1 = apiSubmit()
-//   const prefectureData = await getPrefectures()
-
-// const prefecturesArray: object[] = []
-
-// for (let i = 0; i < prefectureData.length; i++) {
-//   prefecturesArray.push(prefectureData[i])
-// }
-
-// console.log(prefecturesArray)
-// prefectures1.then((resultArray: object[]) => {
-//       for (let i = 1; i <= prefecturesArray.length; i++) {
-//         prefecturesArray.push(resultArray[i])
-//       }
-//     });
-// console.log(prefecturesArray)
-// prefecturesArray.map((value) => {
-// })
-// console.log(prefectures)
-// console.log(prefectures.map((e) => e))
-// export const Form = async ({ prefectures }: {prefectures: {}}) => {
 export const Form = () => {
   const getPrefectures = async () => {
     try {
@@ -92,11 +35,7 @@ export const Form = () => {
         requestData: formData,
       })
       .then((response) => {
-        // console.log(response)
-        // console.log(response?.data)
         if (response?.data?.result == true) {
-          // console.log(response)
-          // console.log(response?.data?.message)
           alert('クリニックを登録しました。')
         } else if (response?.data?.result == false) {
           // console.log(response)
@@ -120,62 +59,15 @@ export const Form = () => {
   function onSubmit(formData: object) {
     if (confirm('本当に登録しますか?')) {
       setIsDisabled(true)
-      // return new Promise((resolve) => {
-      //   setTimeout(() => {
-      //     alert(JSON.stringify(values, null, 2))
-      //     alert('登録しました。')
-      //     resolve()
-      //   }, 3000)
-      // })
-      // try {
-      // const response = axios.post('/api/add/clinic', {
-      //   test: values,
-      // })
-      // const response = addClinic(formData);
       addClinic(formData)
-      // console.log(response)
-      // responseData = response.response_data
-      // console.log('onSubmit side')
-      // if(response.result == true){
-      //   console.log(response)
-      //   console.log(response?.data?.message)
-      //   alert('クリニックを登録しました。')
-      // }else if (response?.result == false) {
-      //   console.log(response)
-      //   console.log(response?.data?.message)
-      //   alert('クリニックを登録できませんでした。')
-      // } else {
-      //   console.log(response)
-      //   alert('通信エラーが発生いたしました。もう一度お確かめください')
-      // }
-      // alert(JSON.stringify(response.data, null, 2))
-      // } catch (error) {
-      //   // console.error(error)
-      //   alert('サーバーと接続ができませんでした。もう一度お試しください。')
-      // }
     } else {
       alert('登録しません')
     }
-    // return alert(JSON.stringify(values, null, 2))
   }
-  // useEffect(() => {
-  //   // axios.get('/api/books').then((res) => {
-  //   //   // const data = res.data
-  //   //   // console.log(data)
-  //   //   const data = res.data
-  //   //   console.log(data)
-  //   // })
-
-  // }, [prefectures])
 
   const test: boolean | undefined = true
 
   return (
-    //   <form onSubmit={handleSubmit(onSubmit)}>
-    //   // バリデーションエラーの内容に応じてエラーメッセージが表示される
-    //   <input {...register("userid", rules)} />
-    //   {errors.userid && errors.userid.message}
-    // </form>
 
     <form onSubmit={handleSubmit(onSubmit)}>
       <VStack>
