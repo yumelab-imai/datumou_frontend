@@ -52,9 +52,14 @@ export const SelectForm = (props) => {
         {/* クリニックの種類 */}
         {/* <FormControl isInvalid={errors.category_type}> */}
         <FormControl>
+          {/* <Button colorScheme="blue" mr={3} onClick={()=>{
+            props.onClose()
+            props._setIsScreenState(true)
+            }}>
+            Close
+          </Button> */}
           <FormLabel htmlFor="category_type">クリニックの種類</FormLabel>
-          <Select id="category_type" {...register('category_type')}>
-            <option>--</option>
+          <Select id="category_type" {...register('category_type')} value={1}>
             <option value="1">メンズエナル</option>
             <option value="2">あおばクリニック</option>
             <option value="3">Dr.COBA</option>

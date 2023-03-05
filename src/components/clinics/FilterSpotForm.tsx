@@ -10,16 +10,14 @@ export const FilterSpotForm = (props) => {
   const [isDisabled, setIsDisabled] = useState(false)
   const [isSubmittedData, setIsSubmittedData] = useState(false)
   const [searchRadius, setSearchRadius] = useState(10)
-  const confirmDistance = (spot, myLocation, num) => {
+  const confirmDistance = (spot, num) => {
     console.log(spot)
     let targetPlace = { lat: spot.latitude, lng: spot.longitude }
     console.log('execute confirmDistance')
     console.log(props.myLocation)
     console.log(targetPlace)
-    console.log(myLocation)
     let searchRadius2 = num
     console.log(searchRadius2)
-    console.log(calcGeoDistance(targetPlace, myLocation))
     return calcGeoDistance(targetPlace, props.myLocation) <= searchRadius2
   }
   // km算出
@@ -58,11 +56,9 @@ export const FilterSpotForm = (props) => {
     console.log(formData.search_distance)
     console.log(Number(formData.search_distance))
     setSearchRadius(Number(formData.search_distance))
-    console.log(props.myLocation)
-    // console.log(myLocation)
     const num = Number(formData.search_distance)
     const spots2 = (spots) => {
-      return spots.filter((spot) => confirmDistance(spot, props.myLocation, num))
+      return spots.filter((spot) => confirmDistance(spot, num))
     }
     setSearchSpots(spots2(searchSpots))
     setIsSubmittedData(true)

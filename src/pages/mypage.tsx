@@ -19,12 +19,30 @@ import {
   ModalHeader,
   ModalFooter,
   ModalCloseButton,
-  useDisclosure, //utility hooks の一つ
+  useDisclosure,
+  HStack,
+  Flex,
+  Spacer,
+  Box,
+  Tag,
+  TagLabel,
+  ButtonGroup,
+  TagLeftIcon,
+  TagRightIcon,
+  TagCloseButton, //utility hooks の一つ
 } from '@chakra-ui/react'
 import { SelectForm } from '../components/clinics/selectForm'
 import { FilterSpotForm } from '../components/clinics/FilterSpotForm'
 
-const GoogleMapPanel = ({ children, isScreenState, onOpen, setIsScreenState, spots, setModalType }) => {
+const GoogleMapPanel = ({
+  children,
+  isScreenState,
+  onOpen,
+  setIsScreenState,
+  spots,
+  setModalType,
+  readyAndMoveMyLocation,
+}) => {
   // const [isActive, setIsActive] = useState(false)
   const OverlayTwo = () => (
     <ModalOverlay bgColor="white" backdropFilter="auto" backdropInvert="80%" backdropBlur="2px" />
@@ -42,8 +60,19 @@ const GoogleMapPanel = ({ children, isScreenState, onOpen, setIsScreenState, spo
 
           <div className="area-sub_controllers">
             <div className="sub_controllers">
-              <div className="button current_position_button">現在地</div>
-              <div className="button watch_position_restart_button current_position_button_new">GPS更新</div>
+              <div
+                className="button current_position_button"
+                onClick={() => {
+                  readyAndMoveMyLocation()
+                }}
+              >
+                現在地
+              </div>
+              <div className="button watch_position_restart_button current_position_button_new"
+              onClick={() => {
+                  readyAndMoveMyLocation()
+                }}
+                >GPS更新</div>
             </div>
           </div>
 
@@ -93,7 +122,7 @@ const GoogleMapPanel = ({ children, isScreenState, onOpen, setIsScreenState, spo
 /*/ ///////////////////////////
 
 // ページで表示する『GoogleMap コンポーネント』
-const GoogleMap = ({ spots }) => {
+const GoogleMap = ({ spots, myLocation }) => {
   const [currentFocusSpot, setCurrentFocusSpot] = useState<google.maps.LatLngLiteral | null>(null)
   const focusSpot = (spotLatLngLiteral: google.maps.LatLngLiteral) => {
     setCurrentFocusSpot(spotLatLngLiteral)
@@ -101,14 +130,6 @@ const GoogleMap = ({ spots }) => {
   const unFocusSpot = () => {
     setCurrentFocusSpot(null)
   }
-
-  
-
-
-
-
-
-
 
   // km算出
   const calcGeoDistance = (position1: google.maps.LatLngLiteral, position2: google.maps.LatLngLiteral) => {
@@ -127,6 +148,30 @@ const GoogleMap = ({ spots }) => {
             Math.cos(rlat1) * Math.cos(rlat2) * Math.sin(difflon / 2) * Math.sin(difflon / 2)
         )
       )
+
+    return d
+  }
+  const calcGeoDistance2 = (position1: google.maps.LatLngLiteral) => {
+    let position2: google.maps.LatLngLiteral | null = myLocation
+    console.log('calcGeoDistance2')
+    console.log(position1)
+    console.log(position2)
+    var R = 6371.071 // Radius of the Earth in kilometers
+    var rlat1 = position1.lat * (Math.PI / 180) // Convert degrees to radians
+    var rlat2 = position2.lat * (Math.PI / 180) // Convert degrees to radians
+    var difflat = rlat2 - rlat1 // Radian difference (latitudes)
+    var difflon = (position2.lng - position1.lng) * (Math.PI / 180) // Radian difference (longitudes)
+
+    var d =
+      2 *
+      R *
+      Math.asin(
+        Math.sqrt(
+          Math.sin(difflat / 2) * Math.sin(difflat / 2) +
+            Math.cos(rlat1) * Math.cos(rlat2) * Math.sin(difflon / 2) * Math.sin(difflon / 2)
+        )
+      )
+    console.log(d)
 
     return d
   }
@@ -245,6 +290,11 @@ const GoogleMap = ({ spots }) => {
     return JSON.stringify($object) == JSON.stringify(currentFocusSpot)
   }
 
+  const ceilDistanceWithDigit = (km)=>{
+    let n = 3 // 小数点第n位まで残す
+    return Math.ceil(km * Math.pow(10, n)) / Math.pow(10, n)
+  }
+
   useEffect(() => {
     SpotLightCurrentFocusSpot()
     console.log(currentFocusSpot)
@@ -256,6 +306,16 @@ const GoogleMap = ({ spots }) => {
     console.log('spots 参照箇所33')
     console.log(spots)
   }, [spots])
+  useEffect(() => {
+    console.log('myLocation をusestateで変更')
+    // やりたかった事
+    // if (typeof myLocation === google.maps.LatLngLiteral) {
+      if (myLocation?.lat && myLocation?.lng) {
+      console.log(myLocation)
+      console.log('setCurrentFocusSpot')
+      setCurrentFocusSpot(myLocation)
+    }
+  }, [myLocation])
 
   // 北海道
   const defaultPosition3 = {
@@ -274,8 +334,10 @@ const GoogleMap = ({ spots }) => {
           mapContainerStyle={containerStyle}
           onLoad={onLoad}
         >
-          {/* <MarkerF position={defaultPosition} /> */}
-          {spots.map((spot,index) => (
+          {myLocation?.lat != null &&
+          <MarkerF position={myLocation} icon={{ url: 'https://maps.google.com/mapfiles/kml/paddle/blu-circle.png' ,scaledSize: new google.maps.Size(40, 40)}} />
+      }
+          {spots.map((spot, index) => (
             <div key={index}>
               <MarkerF
                 position={{ lat: spot.latitude, lng: spot.longitude }}
@@ -284,7 +346,14 @@ const GoogleMap = ({ spots }) => {
               {/* HTMLでの吹き出しを設置 */}
               {openInfoWindow({ lat: spot.latitude, lng: spot.longitude }) ? (
                 <InfoWindowF position={{ lat: spot.latitude, lng: spot.longitude }} onCloseClick={() => unFocusSpot()}>
-                  <div>{spot.clinic_name}</div>
+                  <>
+                    <div>{spot.clinic_name}</div>
+                    <div>
+                      {/* 現在地からの距離: {() => calcGeoDistance2({ lat: spot.latitude, lng: spot.longitude })} km */}
+                      現在地からの距離:{' '}
+                      {ceilDistanceWithDigit(calcGeoDistance2({ lat: spot.latitude, lng: spot.longitude }))} km
+                    </div>
+                  </>
                 </InfoWindowF>
               ) : null}
             </div>
@@ -301,13 +370,6 @@ const GoogleMap = ({ spots }) => {
 export default function Home() {
   const [myLocation, setMyLocation] = useState<object>({})
   const [myAddress, setMyAddress] = useState<string>('不明')
-  // const getCurrentPosition = () => {
-  //   console.log('now loading position...')
-  //   // navigator.geolocation.getCurrentPosition((position) => {
-  //   //   const { latitude, longitude } = position.coords
-  //   //   setPosition({ latitude, longitude })
-  //   // })
-  // }
 
   async function getCurrentLocation(): Promise<{ latitude: number; longitude: number }> {
     return new Promise((resolve, reject) => {
@@ -331,13 +393,17 @@ export default function Home() {
     const url =
       `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=` +
       process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-    console.log(url)
-    const response = await fetch(url)
-    const data = await response.json()
-    console.log(data)
-    if (data.error_message) {
+      console.log('url')
+      const response = await fetch(url)
+      console.log('response')
+      const data = await response.json()
+      console.log('レスポンス')
+      console.log(data)
+      if (data.error_message) {
+      console.log('エラー発生')
       throw new Error(data.error_message)
     }
+    console.log('データ')
     console.log(data.results[0].formatted_address)
     return data.results[0].formatted_address
   }
@@ -355,11 +421,14 @@ export default function Home() {
       // console.log(address1)
       const myPosition = { lat: latitude, lng: longitude }
       console.log(myPosition)
-      setMyLocation(myPosition)
+      if (myPosition?.lat && myPosition?.lng) {
+        setMyLocation(myPosition)
+      }
       setMyAddress(address)
       console.log('written by Mr.ChatGTP...')
       return { latitude, longitude, address }
     } catch (error) {
+      console.log('Unable to retrieve your location')
       throw new Error(error)
       throw new Error('Unable to retrieve your location')
     }
@@ -374,19 +443,28 @@ export default function Home() {
       console.error('Woops! bad problem is occured')
     }
   }
+  const readyAndMoveMyLocation = ()=>{
+    console.log('位置を変更')
+    getMyLocationExample()
+  }
   // getMyLocationExample()
   const [spots, setSpots] = useState<object>([])
   const [modalType, setModalType] = useState<number>(1)
   const _setSpot = (spotData) => {
-    console.log('Execute _setSpot')
-    console.log(spotData)
+    if (spotData.length >0){
+      console.log('Execute _setSpot')
+      console.log(spotData)
     setSpots(spotData)
+    }
   }
-  const _setModalType = (num) => {
+  const _setIsScreenState = (bool)=>{
+    setIsScreenState(bool)
+  }
+  // const _setModalType = (num) => {
     // console.log('Execute _setSpot')
     // console.log(num)
     // setSpots(num)
-  }
+  // }
 
   const getSpot = async () => {
     return await axios
@@ -436,17 +514,38 @@ export default function Home() {
           isOpen={isOpen}
           onClose={() => {
             onClose()
-            setIsScreenState(true)
+            setIsScreenState(true) //モーダル以外を押したさいにクローズする
           }}
         >
           {modalType == 1 && (
             <div>
               <ModalOverlay />
               <ModalContent>
-                <ModalHeader>クリニック検索</ModalHeader>
+                <Flex minWidth="max-content" alignItems="center" gap="2">
+                  <Box>
+                    <ModalHeader>クリニック検索</ModalHeader>
+                  </Box>
+                  <Spacer />
+                  <ButtonGroup gap="2" p="2">
+                    <Tag
+                      size="lg"
+                      key="lg"
+                      borderRadius="full"
+                      variant="solid"
+                      colorScheme="green"
+                      onClick={() => {
+                        onClose()
+                        _setIsScreenState(true)
+                      }}
+                    >
+                      <TagLabel>Close</TagLabel>
+                      <TagCloseButton />
+                    </Tag>
+                  </ButtonGroup>
+                </Flex>
                 <ModalBody>
                   {/* <Form prefecturesTest={prefecturesTest} /> */}
-                  <SelectForm _setSpot={_setSpot} />
+                  <SelectForm _setSpot={_setSpot} onClose={onClose} _setIsScreenState={_setIsScreenState} />
                 </ModalBody>
               </ModalContent>
             </div>
@@ -455,7 +554,28 @@ export default function Home() {
             <div>
               <ModalOverlay />
               <ModalContent>
-                <ModalHeader>半径〇〇キロ検索</ModalHeader>
+                <Flex minWidth="max-content" alignItems="center" gap="2">
+                  <Box>
+                    <ModalHeader>半径〇〇キロ検索</ModalHeader>
+                  </Box>
+                  <Spacer />
+                  <ButtonGroup gap="2" p="2">
+                    <Tag
+                      size="lg"
+                      key="lg"
+                      borderRadius="full"
+                      variant="solid"
+                      colorScheme="green"
+                      onClick={() => {
+                        onClose()
+                        _setIsScreenState(true)
+                      }}
+                    >
+                      <TagLabel>Close</TagLabel>
+                      <TagCloseButton />
+                    </Tag>
+                  </ButtonGroup>
+                </Flex>
                 <ModalBody>
                   <FilterSpotForm _setSpot={_setSpot} spots={spots} myLocation={myLocation} />
                 </ModalBody>
@@ -470,8 +590,9 @@ export default function Home() {
         setIsScreenState={setIsScreenState}
         spots={spots}
         setModalType={setModalType}
+        readyAndMoveMyLocation={readyAndMoveMyLocation}
       >
-        <GoogleMap spots={spots} />
+        <GoogleMap spots={spots} myLocation={myLocation} />
       </GoogleMapPanel>
     </>
   )
